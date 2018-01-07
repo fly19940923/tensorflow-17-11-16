@@ -71,6 +71,10 @@ def train():
 
     # Build a Graph that computes the logits predictions from the
     # inference model.
+
+    print("images's shaped", images.get_shape())
+
+
     logits = cifar10.inference(images)
 
     # Calculate loss.

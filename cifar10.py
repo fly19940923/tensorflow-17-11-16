@@ -150,6 +150,21 @@ def distorted_inputs():
   data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
   return cifar10_input.distorted_inputs(data_dir=data_dir,
                                         batch_size=FLAGS.batch_size)
+def nondistorted_inputs():
+  """Construct distorted input for CIFAR training using the Reader ops.
+
+  Returns:
+    images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
+    labels: Labels. 1D tensor of [batch_size] size.
+
+  Raises:
+    ValueError: If no data_dir
+  """
+  if not FLAGS.data_dir:
+    raise ValueError('Please supply a data_dir')
+  data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
+  return cifar10_input.inputs(eval_data=False, data_dir=data_dir,
+                                        batch_size=FLAGS.batch_size)
 
 
 def inputs(eval_data):

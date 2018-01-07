@@ -62,7 +62,8 @@ tf.app.flags.DEFINE_boolean('run_once', False,
                          """Whether to run eval only once.""")
 
 
-def eval_once(saver, summary_writer, top_k_op, summary_op):
+
+def eval_once(saver, summary_writer, top_k_op, summary_op, runtimes=None):
   """Run Eval once.
 
   Args:
@@ -108,12 +109,13 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
       summary = tf.Summary()
       summary.ParseFromString(sess.run(summary_op))
       summary.value.add(tag='Precision @ 1', simple_value=precision)
-      summary_writer.add_summary(summary, global_step)
+      summary_writer.add_summary(summary, runtimes)
     except Exception as e:  # pylint: disable=broad-except
       coord.request_stop(e)
 
     coord.request_stop()
     coord.join(threads, stop_grace_period_secs=10)
+    return precision
 
 
 def evaluate():
@@ -143,11 +145,15 @@ def evaluate():
     summary_writer = tf.summary.FileWriter(FLAGS.eval_dir,
                                             graph_def=graph_def)
 
-    while True:
-      eval_once(saver, summary_writer, top_k_op, summary_op)
+
+    temp = []
+    for x in range(10):
+      n = eval_once(saver, summary_writer, top_k_op, summary_op, x)
+      temp.append(n)
       if FLAGS.run_once:
         break
       #time.sleep(FLAGS.eval_interval_secs)
+    print(np.mean(temp))
 
 
 def main(argv=None):  # pylint: disable=unused-argument

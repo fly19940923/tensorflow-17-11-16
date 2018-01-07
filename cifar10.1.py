@@ -1,5 +1,3 @@
-# urs/bin/env python3
-#-*- conding:utf-8 -*-
 # Copyright 2015 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -157,12 +155,6 @@ def distorted_inputs(data_dir, batch_size):
   read_input = read_cifar10(filename_queue)
   reshaped_image = tf.cast(read_input.uint8image, tf.float32)
 
-
-
-  reshaped_image = tf.cond(tf.random_normal([]) > tf.constant(0.),
-                   lambda: reshaped_image,
-                   lambda: tf.subtract(reshaped_image,255.0))
-
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
@@ -182,16 +174,11 @@ def distorted_inputs(data_dir, batch_size):
   distorted_image = tf.image.random_contrast(distorted_image,
                                              lower=0.2, upper=1.8)
 
-
-
-
-
-
   # Subtract off the mean and divide by the variance of the pixels.
   float_image = tf.image.per_image_standardization(distorted_image)
 
   # Ensure that the random shuffling has good mixing properties.
-  min_fraction_of_examples_in_queue = 1
+  min_fraction_of_examples_in_queue = 0.4
   min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                            min_fraction_of_examples_in_queue)
   print ('Filling queue with %d CIFAR images before starting to train. '
@@ -232,19 +219,17 @@ def inputs(eval_data, data_dir, batch_size):
   # Read examples from files in the filename queue.
   read_input = read_cifar10(filename_queue)
   reshaped_image = tf.cast(read_input.uint8image, tf.float32)
-
-  reshaped_image  = tf.subtract(reshaped_image,255.0)
-
-  print("shape:",reshaped_image.get_shape())
-
-
+  reshaped_image1 = tf.subtract(255.0, reshaped_image)
+  black = np.ones(shape=[32,32,1],dtype=np.float32)
+  black1 = tf.constant(black)
+  black1 = tf.concat([reshaped_image1, black1], axis=2)
 
   height = IMAGE_SIZE
   width = IMAGE_SIZE
 
   # Image processing for evaluation.
   # Crop the central [height, width] of the image.
-  resized_image = tf.image.resize_image_with_crop_or_pad(reshaped_image,
+  resized_image = tf.image.resize_image_with_crop_or_pad(black1,
                                                          width, height)
   ##resized_image_hsv = tf.image.rgb_to_hsv(resized_image)
 
